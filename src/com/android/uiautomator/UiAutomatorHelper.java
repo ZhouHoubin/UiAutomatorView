@@ -16,12 +16,12 @@
 
 package com.android.uiautomator;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
+import com.android.ddmlib.CollectingOutputReceiver;
+import com.android.ddmlib.IDevice;
+import com.android.ddmlib.RawImage;
+import com.android.ddmlib.SyncService;
+import com.android.uiautomator.tree.BasicTreeNode;
+import com.android.uiautomator.tree.RootWindowNode;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.swt.SWT;
@@ -31,12 +31,12 @@ import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.widgets.Display;
 
-import com.android.ddmlib.CollectingOutputReceiver;
-import com.android.ddmlib.IDevice;
-import com.android.ddmlib.RawImage;
-import com.android.ddmlib.SyncService;
-import com.android.uiautomator.tree.BasicTreeNode;
-import com.android.uiautomator.tree.RootWindowNode;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Locale;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 public class UiAutomatorHelper {
     public static final int UIAUTOMATOR_MIN_API_LEVEL = 16;
@@ -231,16 +231,16 @@ public class UiAutomatorHelper {
         monitor.subTask("Obtaining device screenshot");
         Image screenshot = null;
         try {
-            String cmd = "adb shell screencap -p /sdcard/1screen.png";
+            String cmd = String.format(Locale.CHINA,"adb -s %s shell screencap -p /sdcard/1screen.png",device.getSerialNumber());
             System.out.println(cmd);
             CommandPromptUtil commandPromptUtil = new CommandPromptUtil();
             commandPromptUtil.runCommand(cmd);
 
-            cmd = "adb pull /sdcard/1screen.png ./elio.png";
+            cmd = String.format(Locale.CHINA,"adb -s %s pull /sdcard/1screen.png ./screenshot.png",device.getSerialNumber());
             commandPromptUtil = new CommandPromptUtil();
             commandPromptUtil.runCommand(cmd);
             //device.pullFile("/sdcard/1screen.png", "./elio.png");
-            screenshot = new Image(Display.getCurrent(), new FileInputStream("./elio.png"));
+            screenshot = new Image(Display.getCurrent(), new FileInputStream("./screenshot.png"));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -254,7 +254,7 @@ public class UiAutomatorHelper {
             throw new UiAutomatorException(msg, e);
         }
         long end = System.currentTimeMillis();
-        System.out.println(end-start);
+        System.out.println(end - start);
         return new UiAutomatorResult(xmlDumpFile, model, screenshot);
     }
 
